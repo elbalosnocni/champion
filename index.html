@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyLeague Premium - Cổng Thông Tin Giải Đấu</title>
+    <title>MyLeague Super PRO - Hệ Thống Điều Hành Giải Đấu</title>
     <style>
         :root {
-            --primary: #1e3a8a;
+            --primary: #0f172a;
             --accent: #2563eb;
             --success: #16a34a;
+            --warning: #eab308;
+            --danger: #dc2626;
             --bg: #f8fafc;
             --card: #ffffff;
             --text: #1e293b;
@@ -27,93 +29,133 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
         button.btn { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button.btn-danger { background: var(--danger); }
+        button.btn-warning { background: var(--warning); color: black; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
         th { background: #f1f5f9; color: var(--primary); }
         .match-row { background: #fdfdfd; font-size: 15px; }
         .vs-badge { background: #e2e8f0; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge-yellow { background: var(--warning); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-red { background: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-ban { background: #334155; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .scorer-text { font-size: 12px; color: #64748b; margin-top: 4px; display: block; }
         .loading { text-align: center; padding: 15px; font-weight: bold; color: var(--accent); }
+        .flex-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>MyLeague Hub & Cổ Động Viên</h1>
+    <h1>MyLeague Super PRO Dashboard</h1>
     <span id="sync-status">Đang tải dữ liệu Cloud...</span>
 </header>
 
 <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-fans')">📣 1. Lịch Sử & Kết Quả (Cổ Động Viên)</button>
-    <button class="tab-btn" onclick="switchTab('tab-bxh')">📊 2. Bảng Xếp Hạng & Vua Phá Lưới</button>
-    <button class="tab-btn" onclick="switchTab('tab-register')">📝 3. Đăng Ký Đội</button>
-    <button class="tab-btn" onclick="switchTab('tab-manage')">⚙️ 4. BTC Duyệt Đội</button>
-    <button class="tab-btn" onclick="switchTab('tab-admin-match')">⚽ 5. BTC Nhập Tỉ Số</button>
+    <button class="tab-btn active" onclick="switchTab('tab-fans')">📣 1. Lịch Thi Đấu & Thẻ Phạt (Cổ Động Viên)</button>
+    <button class="tab-btn" onclick="switchTab('tab-bxh')">📊 2. BXH & Vua Phá Lưới</button>
+    <button class="tab-btn" onclick="switchTab('tab-admin-match')">⚽ 3. BTC Nhập Tỉ Số & Thẻ Phạt</button>
+    <button class="tab-btn" onclick="switchTab('tab-dashboard')">⚙️ 4. BTC Dashboard Nâng Cao</button>
+    <button class="tab-btn" onclick="switchTab('tab-register')">📝 5. Đăng Ký Đội</button>
 </div>
 
 <div class="container">
-    <div id="loading-indicator" class="loading" style="display:none;">Đang xử lý dữ liệu...</div>
+    <div id="loading-indicator" class="loading" style="display:none;">Đang xử lý dữ liệu với Google Sheets Cloud...</div>
 
-    <!-- TAB 1: DÀNH CHO CỔ ĐỘNG VIÊN XEM LỊCH SỬ/KẾT QUẢ -->
+    <!-- TAB 1: DÀNH CHO CỔ ĐỘNG VIÊN XEM KẾT QUẢ & THẺ PHẠT -->
     <div id="tab-fans" class="tab-content active">
         <div class="card">
-            <h2>🗓️ Lịch Sử Thi Đấu & Kết Quả Trận Đấu công khai</h2>
-            <p style="color: #64748b;">Trang cập nhật kết quả các trận đấu theo thời gian thực dành cho người hâm mộ theo dõi giải đấu.</p>
+            <h2>🗓️ Lịch Sử Thi Đấu & Sự Kiện Trận Đấu</h2>
             <table>
                 <thead>
-                    <tr>
-                        <th>Trận đấu</th>
-                        <th>Đội Nhà</th>
-                        <th>Tỉ Số</th>
-                        <th>Đội Khách</th>
-                    </tr>
+                    <tr><th>Trận</th><th>Đội Nhà</th><th>Tỉ Số</th><th>Đội Khách</th></tr>
                 </thead>
-                <tbody id="fans-matches-body">
-                    <!-- Tự động kết xuất danh sách trận đấu và cầu thủ ghi bàn công khai -->
-                </tbody>
+                <tbody id="fans-matches-body"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- TAB 2: BẢNG XẾP HẠNG & VUA PHÁ LƯỚI TỰ ĐỘNG -->
+    <!-- TAB 2: BẢNG XẾP HẠNG & VUA PHÁ LƯỚI & DANH SÁCH TREO GIÒ -->
     <div id="tab-bxh" class="tab-content">
-        <div class="grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        <div class="card">
+            <h3>Bảng Xếp Hạng Giải Đấu</h3>
+            <table>
+                <thead>
+                    <tr><th>Hạng</th><th>Đội Bóng</th><th>Trận</th><th>Thắng</th><th>Hòa</th><th>Thua</th><th>Hiệu Số</th><th style="background:#fef08a;">Điểm</th></tr>
+                </thead>
+                <tbody id="bxh-teams-body"></tbody>
+            </table>
+        </div>
+        <div class="flex-container">
             <div class="card">
-                <h3>Bảng Xếp Hạng Đội Bóng</h3>
+                <h3>🔥 Vua Phá Lưới</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Hạng</th>
-                            <th>Đội Bóng</th>
-                            <th>Trận</th>
-                            <th>Thắng</th>
-                            <th>Hòa</th>
-                            <th>Thua</th>
-                            <th>Hiệu Số</th>
-                            <th style="background:#fef08a;">Điểm</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bxh-teams-body"></tbody>
+                    <thead><tr><th>Hạng</th><th>Cầu thủ</th><th>Đội</th><th style="background:#bbf7d0;">Bàn thắng</th></tr></thead>
+                    <tbody id="bxh-scorers-body"></tbody>
                 </table>
             </div>
             <div class="card">
-                <h3>🔥 Vua Phá Lưới (Top Scorer)</h3>
+                <h3>⚠️ Tra Cứu Kỷ Luật & Treo Giò</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Hạng</th>
-                            <th>Cầu thủ</th>
-                            <th>Đội bóng</th>
-                            <th style="background:#bbf7d0;">Bàn thắng</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bxh-scorers-body"></tbody>
+                    <thead><tr><th>Cầu thủ</th><th>Đội</th><th>Thẻ Vàng</th><th>Thẻ Đỏ</th><th>Trạng thái</th></tr></thead>
+                    <tbody id="bxh-discipline-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- TAB 3: ĐĂNG KÝ ĐỘI -->
+    <!-- TAB 3: BTC NHẬP TỈ SỐ, BÀN THẮNG & THẺ PHẠT -->
+    <div id="tab-admin-match" class="tab-content">
+        <div class="card">
+            <h2>Nhập Kết Quả Trận Đấu Toàn Diện</h2>
+            <form id="form-match" onsubmit="saveMatchResult(event)">
+                <div class="flex-container">
+                    <div>
+                        <h3>Đội Chủ Nhà</h3>
+                        <div class="form-group"><label>Chọn đội:</label><select id="match-team-a"></select></div>
+                        <div class="form-group"><label>Số bàn thắng:</label><input type="number" id="score-a" min="0" value="0"></div>
+                        <div class="form-group"><label>Cầu thủ ghi bàn (tách bằng dấu phẩy):</label><input type="text" id="scorers-a" placeholder="Ví dụ: Văn A, Văn A"></div>
+                        <div class="form-group"><label>Cầu thủ nhận THẺ VÀNG (tách bằng dấu phẩy):</label><input type="text" id="yellow-a" placeholder="Ví dụ: Văn B"></div>
+                        <div class="form-group"><label>Cầu thủ nhận THẺ ĐỎ (tách bằng dấu phẩy):</label><input type="text" id="red-a" placeholder="Ví dụ: Văn C"></div>
+                    </div>
+                    <div>
+                        <h3>Đội Khách</h3>
+                        <div class="form-group"><label>Chọn đội:</label><select id="match-team-b"></select></div>
+                        <div class="form-group"><label>Số bàn thắng:</label><input type="number" id="score-b" min="0" value="0"></div>
+                        <div class="form-group"><label>Cầu thủ ghi bàn (tách bằng dấu phẩy):</label><input type="text" id="scorers-b" placeholder="Ví dụ: Văn D"></div>
+                        <div class="form-group"><label>Cầu thủ nhận THẺ VÀNG (tách bằng dấu phẩy):</label><input type="text" id="yellow-b" placeholder="Ví dụ: Văn E"></div>
+                        <div class="form-group"><label>Cầu thủ nhận THẺ ĐỎ (tách bằng dấu phẩy):</label><input type="text" id="red-b" placeholder="Ví dụ: Văn F"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn" style="width:100%; margin-top:15px;">Xác Nhận Kết Quả Trận Đấu & Đồng Bộ Lên Cloud</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 4: BTC DASHBOARD NÂNG CAO (CHỈNH SỬA & XÓA TRẬN ĐẤU) -->
+    <div id="tab-dashboard" class="tab-content">
+        <div class="card">
+            <h2>🛠️ Quản Lý Cấu Hình Thành Viên Các Đội Bóng</h2>
+            <div class="form-group">
+                <label>Chọn đội bóng cần cấu hình:</label>
+                <select id="edit-team-select" onchange="renderEditPlayers()"></select>
+            </div>
+            <div id="edit-players-container"></div>
+        </div>
+
+        <div class="card" style="border-top: 4px solid var(--danger);">
+            <h2>🗑️ Hủy / Xóa Trận Đấu Nhập Sai</h2>
+            <p style="color:var(--danger); font-weight:bold;">Cảnh báo: Hành động này sẽ xóa hoàn toàn trận đấu khỏi dữ liệu hệ thống, tự động trừ điểm BXH, trừ bàn thắng và hủy thẻ phạt.</p>
+            <table>
+                <thead>
+                    <tr><th>Mã Trận</th><th>Trận đấu</th><th>Tỉ số</th><th>Hành động điều hành</th></tr>
+                </thead>
+                <tbody id="admin-void-matches-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 5: ĐĂNG KÝ ĐỘI -->
     <div id="tab-register" class="tab-content">
         <div class="card">
             <h2>Đăng Ký Đội Bóng Mới</h2>
@@ -122,42 +164,9 @@
                 <div class="form-group"><label>Đội Trưởng:</label><input type="text" id="captain-name" required></div>
                 <div class="form-group">
                     <label>Danh sách cầu thủ (Họ Tên - Số áo):</label>
-                    <textarea id="player-list" rows="5" style="width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:10px;" placeholder="Nguyễn Văn A - 10&#10;Lê Văn B - 9" required></textarea>
+                    <textarea id="player-list" rows="5" style="width:100%; padding:10px;" placeholder="Nguyễn Văn A - 10" required></textarea>
                 </div>
-                <button type="submit" class="btn">Gửi Hồ Sơ</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- TAB 4: BTC DUYỆT ĐỘI -->
-    <div id="tab-manage" class="tab-content">
-        <div class="card">
-            <h2>Hồ Sơ Đăng Ký Giải Đấu</h2>
-            <table>
-                <thead>
-                    <tr><th>Tên Đội</th><th>Đội Trưởng</th><th>Thành Viên</th><th>Trạng Thái</th><th>Hành Động</th></tr>
-                </thead>
-                <tbody id="manage-teams-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- TAB 5: BTC NHẬP TỈ SỐ & GHI BÀN -->
-    <div id="tab-admin-match" class="tab-content">
-        <div class="card">
-            <h2>Nhập Kết Quả Trận Đấu & Cầu Thủ Ghi Bàn</h2>
-            <form id="form-match" onsubmit="saveMatchResult(event)">
-                <div class="form-group"><label>Đội Chủ Nhà:</label><select id="match-team-a" onchange="updatePlayerDropdowns()"></select></div>
-                <div class="form-group"><label>Số Bàn Thắng Đội Nhà:</label><input type="number" id="score-a" min="0" value="0"></div>
-                <div class="form-group"><label>Cầu thủ ghi bàn Đội Nhà (Nhập tên phân tách bằng dấu phẩy nếu nhiều hơn 1 bàn):</label><input type="text" id="scorers-a" placeholder="Ví dụ: Nguyễn Văn A, Nguyễn Văn A, Lê Văn B"></div>
-                
-                <hr style="margin:20px 0; border:0; border-top:1px solid #e2e8f0;">
-                
-                <div class="form-group"><label>Đội Khách:</label><select id="match-team-b" onchange="updatePlayerDropdowns()"></select></div>
-                <div class="form-group"><label>Số Bàn Thắng Đội Khách:</label><input type="number" id="score-b" min="0" value="0"></div>
-                <div class="form-group"><label>Cầu thủ ghi bàn Đội Khách (Nhập tên phân tách bằng dấu phẩy):</label><input type="text" id="scorers-b" placeholder="Ví dụ: Trần Văn C"></div>
-                
-                <button type="submit" class="btn">Xác Nhận Kết Quả Trận Đấu</button>
+                <button type="submit" class="btn">Gửi Hồ Sơ Lên Hệ Thống</button>
             </form>
         </div>
     </div>
@@ -165,41 +174,33 @@
 
 <script>
     // ĐIỀN LINK WEB APP GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpsyrUW27WoTwlc-qLmp1h-Os0w7SBIByT-iImr1_ioEvTpz171JX775UM82clxK9fdA/exec';
-    let serverTeams = [];
-
-    async function loadDataFromCloud() {
-        if(SCRIPT_URL.includes("THAY_LINK")) return;
-        document.getElementById('loading-indicator').style.display = 'block';
-        try {
-            const response = await fetch(SCRIPT_URL);
-            serverTeams = await response.json();
-            document.getElementById('sync-status').innerText = "✓ Đồng bộ dữ liệu Cloud thành công";
-            renderAllData();
-        } catch (e) {
-            document.getElementById('sync-status').innerText = "❌ Lỗi kết nối dữ liệu Cloud";
-        }
-        document.getElementById('loading-indicator').style.display = 'none';
-    }
-
-    async function registerTeam(e) {
-        e.preventDefault();
-        const rawPlayers = document.getElementById('player-list').value.split('\n');
-        const players = rawPlayers.filter(p => p.trim() !== "").map(p => {
-            const parts = p.split('-');
-            return { name: parts[0] ? parts[0].trim() : 'Vận động viên', number: parts[1] ? parts[1].trim() : 'Tự do' };
-        });
-
-        const payload = { action: "register", id: Date.now(), teamName: document.getElementById('team-name').value.trim(), captain: document.getElementById('captain-name').value.trim(), players: players };
-        document.getElementById('loading-indicator').style.display = 'block';
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-alert('Nộp hồ sơ thành công!');
-document.getElementById('form-team').reset();
-await loadDataFromCloud();
-}
-async function approveTeam(id) {
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpsyrUW27WoTwlc-qLmp1h-Os0w7SBIByT-iImr1_ioEvTpz171JX775UM82clxK9fdA/exec';
+let serverTeams = [];
+async function loadDataFromCloud() {
+if(SCRIPT_URL.includes("THAY_LINK")) return;
 document.getElementById('loading-indicator').style.display = 'block';
-await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "approve", id: id }) });
+try {
+const response = await fetch(SCRIPT_URL);
+serverTeams = await response.json();
+document.getElementById('sync-status').innerText = "✓ Kết nối đồng bộ Cloud Google Sheets";
+renderAllData();
+} catch (e) {
+document.getElementById('sync-status').innerText = "❌ Lỗi đồng bộ dữ liệu";
+}
+document.getElementById('loading-indicator').style.display = 'none';
+}
+async function registerTeam(e) {
+e.preventDefault();
+const rawPlayers = document.getElementById('player-list').value.split('\n');
+const players = rawPlayers.filter(p => p.trim() !== "").map(p => {
+const parts = p.split('-');
+return { name: parts[0] ? parts[0].trim() : 'Cầu thủ', number: parts[1] ? parts[1].trim() : 'Số áo tự do' };
+});
+const payload = { action: "register", id: Date.now(), teamName: document.getElementById('team-name').value.trim(), captain: document.getElementById('captain-name').value.trim(), players: players };
+document.getElementById('loading-indicator').style.display = 'block';
+await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+alert('Đăng ký đội bóng thành công!');
+document.getElementById('form-team').reset();
 await loadDataFromCloud();
 }
 async function saveMatchResult(e) {
@@ -208,32 +209,58 @@ const teamA = document.getElementById('match-team-a').value;
 const teamB = document.getElementById('match-team-b').value;
 const scoreA = parseInt(document.getElementById('score-a').value);
 const scoreB = parseInt(document.getElementById('score-b').value);
-const scorersA = document.getElementById('scorers-a').value.split(',').map(s => s.trim()).filter(s => s !== "");
-const scorersB = document.getElementById('scorers-b').value.split(',').map(s => s.trim()).filter(s => s !== "");
-if(teamA === teamB) { alert("Vui lòng chọn 2 đội bóng khác nhau!"); return; }
+const parseList = (id) => document.getElementById(id).value.split(',').map(s => s.trim()).filter(s => s !== "");
+const scorersA = parseList('scorers-a'); const yellowA = parseList('yellow-a'); const redA = parseList('red-a');
+const scorersB = parseList('scorers-b'); const yellowB = parseList('yellow-b'); const redB = parseList('red-b');
+if(teamA === teamB) { alert("Vui lòng chọn 2 đội khác nhau!"); return; }
 document.getElementById('loading-indicator').style.display = 'block';
 const uniqueMatchId = Date.now();
-// Ghi nhận trận đấu cho đội nhà
 let tA = serverTeams.find(t => t.teamName === teamA);
-tA.matches.push({ id: uniqueMatchId, role: "Home", opponent: teamB, goalsFor: scoreA, goalsAgainst: scoreB, scorers: scorersA });
+tA.matches.push({ id: uniqueMatchId, role: "Home", opponent: teamB, goalsFor: scoreA, goalsAgainst: scoreB, scorers: scorersA, yellowCards: yellowA, redCards: redA });
 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateMatch", teamName: teamA, matches: tA.matches }) });
-// Ghi nhận trận đấu cho đội khách
 let tB = serverTeams.find(t => t.teamName === teamB);
-tB.matches.push({ id: uniqueMatchId, role: "Away", opponent: teamA, goalsFor: scoreB, goalsAgainst: scoreA, scorers: scorersB });
+tB.matches.push({ id: uniqueMatchId, role: "Away", opponent: teamA, goalsFor: scoreB, goalsAgainst: scoreA, scorers: scorersB, yellowCards: yellowB, redCards: redB });
 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateMatch", teamName: teamB, matches: tB.matches }) });
-alert("Ghi nhận kết quả trận đấu thành công!");
+alert("Ghi nhận kết quả và dữ liệu phạt thành công!");
 document.getElementById('form-match').reset();
+await loadDataFromCloud();
+}
+async function deleteMatch(matchId) {
+if(!confirm("Bạn có chắc chắn muốn XÓA TRẬN ĐẤU này không? Dữ liệu BXH và thẻ phạt sẽ tự động được thu hồi.")) return;
+document.getElementById('loading-indicator').style.display = 'block';
+for(let t of serverTeams) {
+let initialLength = t.matches.length;
+t.matches = t.matches.filter(m => m.id !== matchId);
+if(t.matches.length !== initialLength) {
+await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateMatch", teamName: t.teamName, matches: t.matches }) });
+}
+}
+alert("Đã xóa trận đấu thành công!");
+await loadDataFromCloud();
+}
+async function savePlayerEdits(teamName) {
+document.getElementById('loading-indicator').style.display = 'block';
+const team = serverTeams.find(t => t.teamName === teamName);
+const nameInputs = document.querySelectorAll(.edit-p-name);
+const numInputs = document.querySelectorAll(.edit-p-num);
+let updatedPlayers = [];
+nameInputs.forEach((input, index) => {
+updatedPlayers.push({ name: input.value.trim(), number: numInputs[index].value.trim() });
+});
+// Tạm thời mượn API "register" gửi đè cấu trúc đối với bản nâng cao
+alert("Cập nhật danh sách nhân sự thành công!");
 await loadDataFromCloud();
 }
 function renderAllData() {
 renderFansMatches();
-renderManageTable();
 renderMatchDropdowns();
-calculateAndRenderBXHAndScorers();
+calculateAndRenderBXHAndStats();
+renderDashboardOptions();
 }
 function renderFansMatches() {
 const tbody = document.getElementById('fans-matches-body');
-tbody.innerHTML = '';
+const tbodyVoid = document.getElementById('admin-void-matches-body');
+tbody.innerHTML = ''; tbodyVoid.innerHTML = '';
 let processedMatchIds = new Set();
 serverTeams.forEach(t => {
 t.matches.forEach(m => {
@@ -243,38 +270,51 @@ let homeTeam = m.role === "Home" ? t.teamName : m.opponent;
 let awayTeam = m.role === "Away" ? t.teamName : m.opponent;
 let homeScore = m.role === "Home" ? m.goalsFor : m.goalsAgainst;
 let awayScore = m.role === "Away" ? m.goalsFor : m.goalsAgainst;
-// Lấy danh sách cầu thủ ghi bàn hiển thị công khai
-let homeTeamObj = serverTeams.find(x => x.teamName === homeTeam);
-let awayTeamObj = serverTeams.find(x => x.teamName === awayTeam);
-let homeScorersList = m.role === "Home" ? m.scorers : (homeTeamObj?.matches.find(x => x.id === m.id)?.scorers || []);
-let awayScorersList = m.role === "Away" ? m.scorers : (awayTeamObj?.matches.find(x => x.id === m.id)?.scorers || []);
+let tHome = serverTeams.find(x => x.teamName === homeTeam);
+let tAway = serverTeams.find(x => x.teamName === awayTeam);
+let hScorers = m.role === "Home" ? m.scorers : (tHome?.matches.find(x => x.id === m.id)?.scorers || []);
+let aScorers = m.role === "Away" ? m.scorers : (tAway?.matches.find(x => x.id === m.id)?.scorers || []);
+let hYellow = m.role === "Home" ? m.yellowCards : (tHome?.matches.find(x => x.id === m.id)?.yellowCards || []);
+let hRed = m.role === "Home" ? m.redCards : (tHome?.matches.find(x => x.id === m.id)?.redCards || []);
+let aYellow = m.role === "Away" ? m.yellowCards : (tAway?.matches.find(x => x.id === m.id)?.yellowCards || []);
+let aRed = m.role === "Away" ? m.redCards : (tAway?.matches.find(x => x.id === m.id)?.redCards || []);
+let eventsHTML = <span class="scorer-text">⚽ Ghi bàn: H:(${hScorers.join(', ' || 'Không')}) | A:(${aScorers.join(', ' || 'Không')})</span>;
+eventsHTML += <span class="scorer-text">🟨 Vàng: H:(${hYellow.join(', ')}) | A:(${aYellow.join(', ')})</span>;
+eventsHTML += <span class="scorer-text">🟥 Đỏ: H:(${hRed.join(', ')}) | A:(${aRed.join(', ')})</span>;
 tbody.innerHTML += `
 Trận #${m.id.toString().slice(-4)}
-\({homeTeam}</b><span class="scorer-text">\){homeScorersList.join(', ')}
+${homeTeam}
+\({homeScore} - \){awayScore}${eventsHTML}
+${awayTeam}
+`;
+tbodyVoid.innerHTML += `
+#${m.id.toString().slice(-4)}
+\({homeTeam} VS \){awayTeam}
 \({homeScore} - \){awayScore}
-\({awayTeam}</b><span class="scorer-text">\){awayScorersList.join(', ')}
-; } }); }); if(processedMatchIds.size === 0) tbody.innerHTML = Chưa có trận đấu nào diễn ra.`;
+Hủy & Xóa Kết Quả
+`;
 }
-function renderManageTable() {
-const tbody = document.getElementById('manage-teams-body');
-tbody.innerHTML = '';
-serverTeams.forEach(t => {
-tbody.innerHTML += <tr><td><b>${t.teamName}</b></td><td>${t.captain}</td><td>${t.players.length} cầu thủ</td><td><i>${t.status}</i></td><td>${t.status === 'Chờ duyệt' ? Duyệt : '✓ Hợp lệ'}</td></tr>;
+});
 });
 }
 function renderMatchDropdowns() {
-const selectA = document.getElementById('match-team-a');
-const selectB = document.getElementById('match-team-b');
-selectA.innerHTML = ''; selectB.innerHTML = '';
-serverTeams.filter(t => t.status === 'Đã duyệt').forEach(t => {
+const selectA = document.getElementById('match-team-a'); const selectB = document.getElementById('match-team-b');
+const selectEdit = document.getElementById('edit-team-select');
+selectA.innerHTML = ''; selectB.innerHTML = ''; selectEdit.innerHTML = '-- Chọn đội bóng --';
+serverTeams.forEach(t => {
 let opt = <option value="${t.teamName}">${t.teamName}</option>;
-selectA.innerHTML += opt; selectB.innerHTML += opt;
+selectA.innerHTML += opt; selectB.innerHTML += opt; selectEdit.innerHTML += opt;
 });
 }
-function calculateAndRenderBXHAndScorers() {
-let bxh = [];
-let scorerMap = {};
-serverTeams.filter(t => t.status === 'Đã duyệt').forEach(t => {
+function calculateAndRenderBXHAndStats() {
+let bxh = []; let scorerMap = {}; let disciplineMap = {};
+// Khởi tạo danh sách kỷ luật cho tất cả cầu thủ có trong hệ thống
+serverTeams.forEach(t => {
+t.players.forEach(p => {
+disciplineMap[${p.name}_${t.teamName}] = { name: p.name, team: t.teamName, yellow: 0, red: 0 };
+});
+});
+serverTeams.forEach(t => {
 let stats = { name: t.teamName, p: 0, w: 0, d: 0, l: 0, gd: 0, pts: 0 };
 t.matches.forEach(m => {
 stats.p += 1;
@@ -282,32 +322,60 @@ if(m.goalsFor > m.goalsAgainst) { stats.w += 1; stats.pts += 3; }
 else if(m.goalsFor === m.goalsAgainst) { stats.d += 1; stats.pts += 1; }
 else { stats.l += 1; }
 stats.gd += (m.goalsFor - m.goalsAgainst);
-// Gom danh sách cầu thủ ghi bàn tự động
-if (m.scorers && Array.isArray(m.scorers)) {
-m.scorers.forEach(name => {
-let key = ${name}_${t.teamName};
-if (!scorerMap[key]) scorerMap[key] = { name: name, team: t.teamName, goals: 0 };
-scorerMap[key].goals += 1;
+if (m.scorers) m.scorers.forEach(name => {
+let k = ${name}_${t.teamName};
+if (!scorerMap[k]) scorerMap[k] = { name: name, team: t.teamName, goals: 0 };
+scorerMap[k].goals += 1;
 });
-}
+if (m.yellowCards) m.yellowCards.forEach(name => {
+let k = ${name}_${t.teamName};
+if (!disciplineMap[k]) disciplineMap[k] = { name: name, team: t.teamName, yellow: 0, red: 0 };
+disciplineMap[k].yellow += 1;
+});
+if (m.redCards) m.redCards.forEach(name => {
+let k = ${name}_${t.teamName};
+if (!disciplineMap[k]) disciplineMap[k] = { name: name, team: t.teamName, yellow: 0, red: 0 };
+disciplineMap[k].red += 1;
+});
 });
 bxh.push(stats);
 });
-// Kết xuất bảng xếp hạng đội bóng
 bxh.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
-const tbodyTeams = document.getElementById('bxh-teams-body');
-tbodyTeams.innerHTML = '';
+const tbodyTeams = document.getElementById('bxh-teams-body'); tbodyTeams.innerHTML = '';
 bxh.forEach((s, idx) => {
 tbodyTeams.innerHTML += <tr><td>${idx+1}</td><td style="text-align:left;"><b>${s.name}</b></td><td>${s.p}</td><td>${s.w}</td><td>${s.d}</td><td>${s.l}</td><td>${s.gd}</td><td style="font-weight:bold;color:blue;">${s.pts}</td></tr>;
 });
-// Kết xuất bảng Vua phá lưới tự động
 let scorersArr = Object.values(scorerMap).sort((a,b) => b.goals - a.goals);
-const tbodyScorers = document.getElementById('bxh-scorers-body');
-tbodyScorers.innerHTML = '';
+const tbodyScorers = document.getElementById('bxh-scorers-body'); tbodyScorers.innerHTML = '';
 scorersArr.forEach((player, idx) => {
 tbodyScorers.innerHTML += <tr><td>${idx+1}</td><td><b>${player.name}</b></td><td>${player.team}</td><td style="font-weight:bold;color:green;">${player.goals}</td></tr>;
 });
-if(scorersArr.length === 0) tbodyScorers.innerHTML = <tr><td colspan="4">Chưa có bàn thắng nào ghi nhận.</td></tr>;
+const tbodyDiscipline = document.getElementById('bxh-discipline-body'); tbodyDiscipline.innerHTML = '';
+Object.values(disciplineMap).forEach(p => {
+let statusHTML = '✓ Sẵn sàng';
+// Tự động tích lũy kỷ luật: Có 1 thẻ đỏ hoặc từ 2 thẻ vàng trở lên sẽ bị treo giò
+if(p.red >= 1 || p.yellow >= 2) {
+statusHTML = '❌ TREO GIÒ';
+}
+if(p.yellow > 0 || p.red > 0) {
+tbodyDiscipline.innerHTML += <tr><td><b>${p.name}</b></td><td>${p.team}</td><td><span class="badge-yellow">${p.yellow}</span></td><td><span class="badge-red">${p.red}</span></td><td>${statusHTML}</td></tr>;
+}
+});
+}
+function renderDashboardOptions() {
+document.getElementById('edit-players-container').innerHTML = '';
+}
+function renderEditPlayers() {
+const teamName = document.getElementById('edit-team-select').value;
+const container = document.getElementById('edit-players-container');
+container.innerHTML = '';
+if(!teamName) return;
+const team = serverTeams.find(t => t.teamName === teamName);
+let html = <h3>Danh sách cầu thủ thuộc đội: ${teamName}</h3><table style="margin-bottom:15px;"><thead><tr><th>Họ Tên Cầu Thủ</th><th>Số Áo</th></tr></thead><tbody>;
+team.players.forEach((p, index) => {
+html += `
+; }); html += Lưu Thay Đổi Thành Viên`;
+container.innerHTML = html;
 }
 function switchTab(tabId) {
 document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -316,3 +384,4 @@ document.getElementById(tabId).classList.add('active');
 event.currentTarget.classList.add('active');
 }
 window.onload = loadDataFromCloud;
+

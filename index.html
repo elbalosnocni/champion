@@ -3,199 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theo Dõi Giải Đấu Bóng Đá</title>
+    <title>MyLeague Clone - Hệ Thống Quản Lý Giải Đấu</title>
     <style>
         :root {
-            --primary: #1e3a8a;
-            --secondary: #0284c7;
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
             --bg: #f8fafc;
-            --card-bg: #ffffff;
+            --card: #ffffff;
             --text: #1e293b;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { margin: 0; font-size: 24px; }
+        .nav-tabs {
+            display: flex;
+            background: #e2e8f0;
+            padding: 5px;
+            gap: 5px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 5px;
+            color: #64748b;
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
         }
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 0 20px;
         }
-        h1, h2 {
-            text-align: center;
-            color: var(--primary);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-        @media (min-width: 992px) {
-            .grid { grid-template-columns: 2fr 1fr; }
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .card {
-            background: var(--card-bg);
+            background: var(--card);
+            border-radius: 8px;
             padding: 20px;
-            border-radius: 10px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            margin-bottom: 20px;
         }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button.btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button.btn-success { background: var(--success); }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 15px;
         }
         th, td {
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             padding: 10px;
+            text-align: left;
+        }
+        th { background: #f1f5f9; }
+        /* Khung thẻ thi đấu */
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .player-card {
+            width: 280px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background: var(--primary);
+            color: #fff;
             text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 14px;
         }
-        th {
-            background-color: #f1f5f9;
-            color: var(--primary);
-            font-weight: 600;
+        .card-body {
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
-        .team-a { color: #b91c1c; font-weight: bold; }
-        .team-b { color: #1d4ed8; font-weight: bold; }
-        .score { font-weight: bold; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; display: inline-block;}
-        .gold { background-color: #fbbf24; color: #78350f; }
-        .silver { background-color: #cbd5e1; color: #334155; }
-        .bronze { background-color: #f59e0b; color: #ffffff; }
-        .khuyenkhich { background-color: #a7f3d0; color: #065f46; }
+        .avatar {
+            width: 70px;
+            height: 90px;
+            background: #e2e8f0;
+            border: 1px solid #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .player-info p {
+            margin: 3px 0;
+            font-size: 13px;
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; }
+        }
     </style>
 </head>
 <body>
 
+<header>
+    <h1>MyLeague Studio</h1>
+    <span id="league-current">Chưa chọn giải đấu</span>
+</header>
+
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-create')">1. Tạo Giải Đấu</button>
+    <button class="tab-btn" onclick="switchTab('tab-register')">2. Nộp Hồ Sơ Đội</button>
+    <button class="tab-btn" onclick="switchTab('tab-manage')">3. Duyệt Đội & Thành Viên</button>
+    <button class="tab-btn" onclick="switchTab('tab-cards')">4. Tải Thẻ Thi Đấu</button>
+</div>
+
 <div class="container">
-    <h1>🏆 BẢNG THEO DÕI GIẢI ĐẤU BÓNG ĐÁ 🏆</h1>
-
-    <!-- KHU VỰC BẢNG A -->
-    <h2 style="border-bottom: 2px solid var(--secondary); padding-bottom: 5px; text-align: left;">⚽ BẢNG A ("4 Đội")</h2>
-    <div class="grid">
+    <!-- TAB 1: TẠO GIẢI ĐẤU -->
+    <div id="tab-create" class="tab-content active">
         <div class="card">
-            <h3>Lịch Thi Đấu & Kết Quả</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Trận</th>
-                        <th>Đội A</th>
-                        <th>Kết Quả</th>
-                        <th>Đội B</th>
-                        <th>Thẻ (A-B)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td class="team-a">MARUEI</td><td class="score">1 - 1</td><td class="team-b">TAAKAKO</td><td>0 - 0</td></tr>
-                    <tr><td>2</td><td class="team-a">VIETNAMMOBILE</td><td class="score">1 - 3</td><td class="team-b">NITTO DENKO</td><td>0 - 0</td></tr>
-                    <tr><td>3</td><td class="team-a">TAKAKO</td><td class="score">0 - 0</td><td class="team-b">VIETNAMMOBILE</td><td>0 - 0</td></tr>
-                    <tr><td>4</td><td class="team-a">NITTO DENKO</td><td class="score">2 - 0</td><td class="team-b">MARUEI</td><td>1(V) - 0</td></tr>
-                    <tr><td>5</td><td class="team-a">MARUEI</td><td class="score">0 - 2</td><td class="team-b">VIETNAMMOBILE</td><td>0 - 0</td></tr>
-                    <tr><td>6</td><td class="team-a">TAKAKO</td><td class="score">1 - 0</td><td class="team-b">NITTO DENKO</td><td>0 - 0</td></tr>
-                </tbody>
-            </table>
+            <h2>Cấu Hình Giải Đấu Mới</h2>
+            <form id="form-league" onsubmit="saveLeague(event)">
+                <div class="form-group">
+                    <label>Tên giải đấu:</label>
+                    <input type="text" id="league-name" placeholder="Ví dụ: Cúp Bóng Đá Phong Trào Toàn Quốc 2026" required>
+                </div>
+                <div class="form-group">
+                    <label>Bộ môn thi đấu:</label>
+                    <select id="league-type">
+                        <option value="Bóng đá Sân 5">Bóng đá Sân 5</option>
+                        <option value="Bóng đá Sân 7">Bóng đá Sân 7</option>
+                        <option value="Bóng đá Chuyên Nghiệp (Sân 11)">Bóng đá Chuyên Nghiệp (Sân 11)</option>
+                        <option value="Liên Quân Mobile">Esport: Liên Quân Mobile</option>
+                        <option value="FC Online (FIFA/PES)">Esport: FC Online (FIFA/PES)</option>
+                        <option value="Dota 2 / LMHT">Esport: Dota 2 / LMHT</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Khởi Tạo Giải Đấu</button>
+            </form>
         </div>
+    </div>
+
+    <!-- TAB 2: NỘP HỒ SƠ ĐỘI BÓNG -->
+    <div id="tab-register" class="tab-content">
         <div class="card">
-            <h3>Bảng Xếp Hạng</h3>
+            <h2>Đăng Ký Đội Bóng & Thành Viên Vào Giải</h2>
+            <form id="form-team" onsubmit="registerTeam(event)">
+                <div class="form-group">
+                    <label>Tên Đội Bóng / Team Esport:</label>
+                    <input type="text" id="team-name" placeholder="Nhập tên đội" required>
+                </div>
+                <div class="form-group">
+                    <label>Họ tên Trưởng đoàn / Đội trưởng:</label>
+                    <input type="text" id="captain-name" placeholder="Nhập tên người đại diện" required>
+                </div>
+                <div class="form-group">
+                    <label>Danh sách thành viên (Nhập mỗi người 1 dòng, định dạng: Họ Tên - Số áo/In-game ID):</label>
+                    <textarea id="player-list" rows="5" style="width:100%; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Nguyễn Văn A - 10&#10;Trần Văn B - 7" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Nộp Hồ Sơ Đăng Ký</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 3: DUYỆT ĐỘI -->
+    <div id="tab-manage" class="tab-content">
+        <div class="card">
+            <h2>Hồ Sơ Chờ Duyệt Vào Giải</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Hạng</th>
-                        <th>Đội Bóng</th>
-                        <th>Điểm</th>
-                        <th>HS</th>
+                        <th>Tên Đội</th>
+                        <th>Đội Trưởng</th>
+                        <th>Số Thành Viên</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr style="background: #fef08a;"><td>1</td><td style="font-weight:bold;">NITTO DENKO</td><td>6</td><td>3</td></tr>
-                    <tr><td>2</td><td>TAKAKO</td><td>5</td><td>1</td></tr>
-                    <tr><td>3</td><td>VIETNAMMOBILE</td><td>4</td><td>0</td></tr>
-                    <tr><td>4</td><td>MARUEI</td><td>1</td><td>-2</td></tr>
+                <tbody id="teams-table-body">
+                    <!-- Dữ liệu tự động render -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- KHU VỰC BẢNG B -->
-    <h2 style="border-bottom: 2px solid var(--secondary); padding-bottom: 5px; text-align: left; margin-top: 40px;">⚽ BẢNG B ("3 Đội")</h2>
-    <div class="grid">
+    <!-- TAB 4: THẺ THI ĐẤU -->
+    <div id="tab-cards" class="tab-content">
         <div class="card">
-            <h3>Lịch Thi Đấu & Kết Quả</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Trận</th>
-                        <th>Đội A</th>
-                        <th>Kết Quả</th>
-                        <th>Đội B</th>
-                        <th>Thẻ (A-B)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>7</td><td class="team-a">KURABE</td><td class="score">1 - 2</td><td class="team-b">WONDERFUL</td><td>1(V) - 2(V)</td></tr>
-                    <tr><td>8</td><td class="team-a">LIWAYWAY</td><td class="score">2 - 1</td><td class="team-b">KURABE</td><td>4(V) - 2(V)</td></tr>
-                    <tr><td>9</td><td class="team-a">WONDERFUL</td><td class="score">3 - 0</td><td class="team-b">LIWAYWAY</td><td>2(V) - 0</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="card">
-            <h3>Bảng Xếp Hạng</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hạng</th>
-                        <th>Đội Bóng</th>
-                        <th>Điểm</th>
-                        <th>HS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="background: #fef08a;"><td>1</td><td style="font-weight:bold;">WONDERFUL</td><td>6</td><td>4</td></tr>
-                    <tr><td>2</td><td>LIWAYWAY</td><td>3</td><td>-6</td></tr>
-                    <tr><td>3</td><td>KURABE</td><td>0</td><td>-2</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- CHUNG KẾT & TỔNG KẾT -->
-    <h2 style="border-bottom: 2px solid var(--secondary); padding-bottom: 5px; text-align: left; margin-top: 40px;">🏅 VÒNG CHUNG KẾT & DANH HIỆU</h2>
-    <div class="grid">
-        <div class="card">
-            <h3>Tranh Hạng III & IV / Tranh Nhất & Nhì</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Trận</th>
-                        <th>Đội A</th>
-                        <th>Kết Quả</th>
-                        <th>Đội B</th>
-                        <th>Ghi Chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>10</td><td class="team-a">TAKAKO</td><td class="score">1 - 3</td><td class="team-b">LIWAYWAY</td><td>Tranh III & IV</td></tr>
-                    <tr style="background: #f0fdf4;"><td>11</td><td class="team-a">NITTO DENKO</td><td class="score">0 - 3</td><td class="team-b">WONDERFUL</td><td>Tranh I & II</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="card">
-            <h3>Kết Quả Chung Cuộc</h3>
-            <table style="text-align: left;">
-                <tbody>
-                    <tr><td><span class="badge gold">VÔ ĐỊCH</span></td><td style="font-weight: bold; color: #b45309;">WONDERFUL</td></tr>
-                    <tr><td><span class="badge silver">HUY CHƯƠNG BẠC</span></td><td style="font-weight: bold; color: #475569;">NITTO DENKO</td></tr>
-                    <tr><td><span class="badge bronze">HUY CHƯƠNG ĐỒNG</span></td><td style="font-weight: bold; color: #b45309;">LIWAYWAY</td></tr>
-                    <tr><td><span class="badge khuyenkhich">KHUYẾN KHÍCH</span></td><td style="font-weight: bold; color: #047857;">TAKAKO</td></tr>
-                </tbody>
-            </table>
+            <h2>Hệ Thống Thẻ Nhân Viên / Vận Động Viên Hợp Lệ</h2>
+            <p>Sau khi duyệt đội bóng, hệ thống tự động sinh mã QR và thông tin thẻ. Nhấn nút in để lưu file PDF.</p>
+            <button class="btn" onclick="window.print()">Tải về / In toàn bộ thẻ thi đấu (PDF)</button>
+            
+            <div class="badge-grid" id="print-area">
+                <!-- Thẻ thi đấu sẽ tự render ở đây -->
+            </div>
         </div>
     </div>
 </div>
 
-</body>
-</html>
+<script>
+    // Quản lý trạng thái dữ liệu (Lưu tạm LocalStorage)
+    let appData = JSON.parse(localStorage.getItem('myleague_db')) || { league: null, teams: [] };
+
+    function saveLeague(e) {
+        e.preventDefault();
+        appData.league = {
+            name: document.getElementById('league-name').value,
+            type: document.getElementById('league-type').value
+        };
+        localStorage.setItem('myleague_db', JSON.stringify(appData));
+        alert('Tạo giải đấu thành công!');
+        updateHeader();
+    }
+
+    function registerTeam(e) {
+        e.preventDefault();
+        if(!appData.league) { alert('Vui lòng tạo giải đấu trước tại Tab 1!'); return; }
+        
+        const rawPlayers = document.getElementById('player-list').value.split('\n');
+        const players = rawPlayers.map(p => {
+            const parts = p.split('-');
+            return {
+                name: parts[0]?.trim() || 'Vận động viên',
+                number: parts[1]?.trim() || 'Tự do'
+            }
+        });
+
+        const newTeam = {
+            id: Date.now(),
+            teamName: document.getElementById('team-name').value,
+            captain: document.getElementById('captain-name').value,
+            players: players,
+            status: 'Chờ duyệt'
+        };
+
+        appData.teams.push(newTeam);
+        localStorage.setItem('myleague_db', JSON.stringify(appData));
+        alert('Nộp hồ sơ thành công! Chờ BTC phê duyệt.');
+document.getElementById('form-team').reset();
+renderTeams();
+}
+function approveTeam(id) {
+const team = appData.teams.find(t => t.id === id);
+if(team) {
+team.status = 'Đã duyệt';
+localStorage.setItem('myleague_db', JSON.stringify(appData));
+renderTeams();
+renderCards();
+alert(Đã duyệt đội ${team.teamName} tham gia giải đấu.);
+}
+}
+function renderTeams() {
+const tbody = document.getElementById('teams-table-body');
+tbody.innerHTML = '';
+appData.teams.forEach(t => {
+tbody.innerHTML += `
+${t.teamName}
+${t.captain}
+${t.players.length} người
+{t.status === 'Chờ duyệt' ? `<button class="btn btn-success" onclick="approveTeam({t.id})">Duyệt vào giải :✓ Đã thi đấu`}
+`;
+});
+}
+function renderCards() {
+const cardGrid = document.getElementById('print-area');
+cardGrid.innerHTML = '';
+const approvedTeams = appData.teams.filter(t => t.status === 'Đã duyệt');
+approvedTeams.forEach(t => {
+t.players.forEach(p => {
+cardGrid.innerHTML += <div class="player-card"> <div class="card-header">${appData.league.name.toUpperCase()}</div> <div class="card-body"> <div class="avatar">Ảnh 3x4</div> <div class="player-info"> <p><b>Đội:</b> ${t.teamName}</p> <p><b>Họ Tên:</b> ${p.name}</p> <p><b>Số áo/ID:</b> ${p.number}</p> <p style="font-size:10px; color:var(--success); font-weight:bold;">✓ THẺ VĐV HỢP LỆ</p> </div> </div> </div>;
+});
+});
+}
+function updateHeader() {
+if(appData.league) {
+document.getElementById('league-current').innerText = ${appData.league.name} [${appData.league.type}];
+}
+}
+function switchTab(tabId) {
+document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+document.getElementById(tabId).classList.add('active');
+event.currentTarget.classList.add('active');
+}
+// Khởi tạo chạy ban đầu
+updateHeader();
+renderTeams();
+renderCards();
+
+
